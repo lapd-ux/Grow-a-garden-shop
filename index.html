@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grow a Garden Shop 🌱</title>
+<style>
+  /* ... (zelfde styles als voorheen) ... */
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #a8e063, #56ab2f);
+    color: #1b3e10;
+    margin: 0; padding: 20px;
+    display: flex; justify-content: center; 
+  }
+  .container {
+    background: #e6f1d6dd;
+    border-radius: 16px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    max-width: 480px;
+    width: 100%;
+    padding: 30px 25px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.8rem;
+    margin-bottom: 15px;
+    color: #2e7d32;
+    user-select: none;
+  }
+  .item {
+    background: #f0fae9;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 18px 0;
+    box-shadow: inset 0 0 7px #a4ca7a;
+  }
+  .item h2 {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  .price {
+    font-weight: 700;
+    color: #3a873a;
+    margin-bottom: 8px;
+  }
+  .stock {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #527a35;
+  }
+  button.buy-btn {
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    width: 100%;
+  }
+  button.buy-btn:disabled {
+    background-color: #a5c492;
+    cursor: default;
+  }
+  .message {
+    margin-top: 15px;
+    font-weight: 600;
+    color: #2a5d1a;
+    text-align: center;
+    user-select: none;
+  }
+  a.discord-link {
+    margin-top: 25px;
+    display: block;
+    background-color: #5865F2;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    padding: 14px 0;
+    border-radius: 12px;
+    text-decoration: none;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Grow a Garden Shop 🌱</h1>
+
+    <div class="item" data-id="mimic">
+      <h2>🐙 Mimic Octopus</h2>
+      <div class="price">Prijs: €8,00</div>
+      <div class="stock">Voorraad: <span class="stock-count">laden...</span></div>
+      <button class="buy-btn">Koop Mimic</button>
+    </div>
+
+    <div class="item" data-id="ckitsune">
+      <h2>🦊 Corrupt Kitsune</h2>
+      <div class="price">Prijs: €5,00</div>
+      <div class="stock">Voorraad: <span class="stock-count">laden...</span></div>
+      <button class="buy-btn">Koop Corrupt Kitsune</button>
+    </div>
+
+    <div class="item" data-id="raccoon">
+      <h2>🦝 Raccoon</h2>
+      <div class="price">Prijs: €11,00</div>
+      <div class="stock">Voorraad: <span class="stock-count">laden...</span></div>
+      <button class="buy-btn">Koop Raccoon</button>
+    </div>
+
+    <div class="item" data-id="rainbo">
+      <h2>🌈 Rainbo Blood Ohwl</h2>
+      <div class="price">Prijs: €8,00</div>
+      <div class="stock">Voorraad: <span class="stock-count">laden...</span></div>
+      <button class="buy-btn">Koop Rainbo Blood</button>
+    </div>
+
+    <a href="https://discord.gg/RweWbUMm" target="_blank" class="discord-link">DM Ryanapana op Discord met betaalbewijs</a>
+
+    <div class="message" id="message"></div>
+  </div>
+
+<script>
+  const initialStock = {
+    mimic: 3,
+    ckitsune: 3,
+    raccoon: 2,
+    rainbo: 1
+  };
+
+  let stock;
+  try {
+    stock = JSON.parse(localStorage.getItem('growGardenStock'));
+    if (!stock) {
+      throw 'Geen stock data';
+    }
+  } catch (e) {
+    console.log('Stock niet gevonden, initialiseren');
+    stock = {...initialStock};
+    localStorage.setItem('growGardenStock', JSON.stringify(stock));
+  }
+
+  const messageEl = document.getElementById('message');
+
+  function updateUI() {
+    document.querySelectorAll('.item').forEach(item => {
+      const id = item.getAttribute('data-id');
+      const countEl = item.querySelector('.stock-count');
+      const btn = item.querySelector('button.buy-btn');
+      console.log(`Item: ${id}, stock: ${stock[id]}`);
+      countEl.textContent = (stock[id] !== undefined) ? stock[id] : 'n.v.t.';
+      if (stock[id] <= 0) {
+        btn.disabled = true;
+        btn.textContent = "Uitverkocht!";
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Koop " + btn.textContent.split(' ')[1];
+      }
+    });
+  }
+
+  document.querySelectorAll('button.buy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const itemDiv = btn.closest('.item');
+      const id = itemDiv.getAttribute('data-id');
+      if (stock[id] > 0) {
+        stock[id]--;
+        localStorage.setItem('growGardenStock', JSON.stringify(stock));
+        updateUI();
+        messageEl.textContent = `🎉 Bedankt voor je aankoop van ${id.toUpperCase()}! Stuur een DM naar Ryanapana met je betaalbewijs. 🥂🌱`;
+        setTimeout(() => { messageEl.textContent = ''; }, 6000);
+      }
+    });
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
